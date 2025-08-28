@@ -1,0 +1,121 @@
+/* Reset + layout */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#wrapper {
+  display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 240px;
+  background-color: #212529;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1000;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+/* Top Controls (brand + toggle) */
+.sidebar-top-controls {
+  background-color: #198754;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+}
+
+/* Collapse behavior */
+.sidebar .nav-link i {
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar .nav-link span,
+.sidebar .sidebar-brand {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.3s, width 0.3s, margin 0.3s;
+  opacity: 1;
+  width: auto;
+  margin-left: 8px;
+}
+
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .sidebar-brand {
+  opacity: 0;
+  width: 0;
+  margin-left: 0;
+}
+
+/* Nav links */
+.nav-link {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  transition: background 0.3s ease;
+  color: white;
+  border-radius: 5px;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: #28a745;
+  font-weight: bold;
+}
+
+/* Logout button */
+.nav-link.btn {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-link.btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Page content area */
+#page-content {
+  flex-grow: 1;
+  margin-left: 240px;
+  background: #f9f9f9;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+#page-content.collapsed {
+  margin-left: 70px;
+}
+
+/* Optional card effect */
+.dashboard-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5) !important;
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - MSME CarbonTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome (for icons) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f3fdf4;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .form-title {
+      color: #198754;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .btn-success {
+      background-color: #198754;
+      border-color: #198754;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="form-container">
+    <h2 class="text-center form-title"><i class="fas fa-leaf me-2"></i>Register Your MSME</h2>
+
+    <form method="POST" action="{{url_for('auth.register')}}">
+      <div class="mb-3">
+        <label for="businessName" class="form-label">Business Name</label>
+        <input type="text" class="form-control" id="businessName" name="business_name" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="ownerName" class="form-label">Owner Name</label>
+        <input type="text" class="form-control" id="ownerName" name="owner_name" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="msmeCategory" class="form-label">MSME Category</label>
+        <select class="form-select" id="msmeCategory" name="msme_category" required>
+          <option value="">Select Category</option>
+          <option value="Micro">Micro</option>
+          <option value="Small">Small</option>
+          <option value="Medium">Medium</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="businessType" class="form-label">Business Type</label>
+        <select class="form-select" id="businessType" name="business_type" required onchange="updateSectors()">
+          <option value="">Select Business Type</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="Textile">Textile</option>
+          <option value="Food Processing">Food Processing</option>
+          <option value="IT Services">IT Services</option>
+          <option value="Logistics">Logistics</option>
+          <option value="Retail">Retail</option>
+          <option value="Construction">Construction</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Education">Education</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    
+      <!-- Sector Dropdown (filtered by business type) -->
+      <div class="mb-3">
+        <label for="sector" class="form-label">Sector</label>
+        <select class="form-select" id="sector" name="sector" required>
+          <option value="">Select Sector</option>
+        </select>
+      </div>
+
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-success">Register</button>
+      </div>
+    </form>
+
+    <p class="mt-3 text-center text-muted">Already have an account? <a href="{{url_for('auth.login')}}" class="text-success">Login here</a></p>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const sectorOptions = {
+    "Manufacturing": [
+      "Iron & Steel", "Aluminium", "Cement", "Petrochemicals", "Foundry", "Paper & Pulp", "Other"
+    ],
+    "Textile": [
+      "Textile", "Other"
+    ],
+    "Food Processing": [
+      "Food Processing", "Other"
+    ],
+    "IT Services": [
+      "Commercial Buildings", "Data Centers", "Other"
+    ],
+    "Logistics": [
+      "Commercial Buildings", "Warehousing", "Other"
+    ],
+    "Retail": [
+      "Commercial Buildings", "Warehousing", "Other"
+    ],
+    "Construction": [
+      "Cement", "Other"
+    ],
+    "Healthcare": [
+      "Commercial Buildings", "Other"
+    ],
+    "Education": [
+      "Commercial Buildings", "Other"
+    ],
+    "Other": [
+      "Other"
+    ]
+  };
+
+  function updateSectors() {
+    const businessType = document.getElementById("businessType").value;
+    const sectorDropdown = document.getElementById("sector");
+    const options = sectorOptions[businessType] || [];
+
+    // Clear existing options
+    sectorDropdown.innerHTML = '<option value="">Select Sector</option>';
+
+    // Add new options
+    options.forEach(sector => {
+      const opt = document.createElement("option");
+      opt.value = sector;
+      opt.textContent = sector;
+      sectorDropdown.appendChild(opt);
+    });
+  }
+</script>
+</body>
+</html>

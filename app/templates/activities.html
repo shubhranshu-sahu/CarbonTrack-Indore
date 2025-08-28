@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+<div class="container mt-4">
+
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center align-items-center g-4">
+
+            <!-- Monthly Activity Count Card (Left) -->
+            <div class="col-md-3">
+                <div class="card shadow-sm border rounded-3 text-center py-4">
+                    <div class="card-body">
+                        <h6 class="text-muted fs-5">This Month</h6>
+                        <h2 class="fw-bold text-success">{{ monthly_count }}</h2>
+                        <p class="mb-0 text-muted">Activities Logged</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Activity Button (Center) -->
+            <div class="col-md-4 text-center">
+                <!-- ✅ Add the missing attributes to trigger the modal -->
+                <button class="btn btn-success btn-lg px-5 py-3" data-bs-toggle="modal" data-bs-target="#activityModal">
+                    <i class="fas fa-plus-circle me-2"></i>Add Activity
+                </button>
+
+            </div>
+
+            <!-- Total Activity Count Card (Right) -->
+            <div class="col-md-3">
+                <div class="card shadow-sm border rounded-3 text-center py-4">
+                    <div class="card-body">
+                        <h6 class="text-muted fs-5">All Time</h6>
+                        <h2 class="fw-bold text-primary">{{ total_count }}</h2>
+                        <p class="mb-0 text-muted">Total Activities</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Modal Form -->
+    <div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="activityModalLabel">Log Carbon Activity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="{{url_for('main.add_activity')}}" method="POST">
+                    <div class="modal-body">
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category" required
+                                onchange="updateSubtypes()">
+                                <option value="">Select Category</option>
+                                <option value="Electricity">Electricity</option>
+                                <option value="Fuel">Fuel</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Material">Material</option>
+                                <option value="Waste">Waste</option>
+                            </select>
+                        </div>
+
+                        <!-- Sub Type -->
+                        <div class="mb-3">
+                            <label for="sub_type" class="form-label">Sub-Type</label>
+                            <select class="form-select" id="sub_type" name="sub_type" required>
+                                <option value="">Select Sub-Type</option>
+                            </select>
+                        </div>
+
+                        <!-- Value -->
+                        <div class="mb-3">
+                            <label for="value" class="form-label">Value</label>
+                            <input type="number" step="0.01" class="form-control" id="value" name="value" required>
+                        </div>
+
+                        <!-- Unit -->
+                        <div class="mb-3">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" id="unit" name="unit" readonly required>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Recent Activities Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold">
+        Recent Activities
+    </div>
+    <div class="card-body table-responsive">
+        {% if recent_emissions %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Sub-type</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                    <th>Emission (kg CO₂)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in recent_emissions %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ activity.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ activity.category }}</td>
+                    <td>{{ activity.sub_type }}</td>
+                    <td>{{ activity.value }}</td>
+                    <td>{{ activity.unit }}</td>
+                    <td>{{ activity.emission }}</td>
+                    <td class="text-center d-flex justify-content-center gap-4 align-items-center">
+
+                        {% raw %}
+                        <!-- You're getting those red squiggly lines in VS Code because VS Code is treating the Jinja2 code inside your HTML file as plain JavaScript, and the template syntax {{ ... }} is confusing the JS linter/parser. -->
+                        <!-- The Jinja2 variables like {{ activity.id }} are not valid JavaScript syntax on their own. So the JS linter in VS Code throws errors -->
+                        {% endraw %}
+                        <a href="javascript:void(0)" class="text-primary" onclick='openEditModal({
+                            id: {{ activity.id }},
+                            category: "{{ activity.category }}",
+                            sub_type: "{{ activity.sub_type }}",
+                            unit: "{{ activity.unit }}",
+                            value: {{ activity.value }},
+                            date: "{{ activity.date.strftime("%Y-%m-%d") }}"
+                        })'>
+                            <i class="fas fa-edit"></i>
+                        </a>
+
+                        <form action="{{ url_for('main.delete_activity', activity_id=activity.id) }}" method="POST"
+                            style="display: inline;">
+                            <button type="submit" class="btn btn-link text-danger p-0 m-0"
+                                onclick="return confirm('Are you sure?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No activities logged yet.</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+<!-- Show All Activities Button -->
+<div class="text-center my-4">
+    <button class="btn btn-outline-success" onclick="toggleAllActivities()">
+        <i class="fas fa-list me-2"></i> Show All Activities
+    </button>
+</div>
+
+<!-- All Activities Table -->
+<div id="allActivitiesTable" class="card shadow-sm border-0 mb-5 mx-3" style="display: none;">
+    <div class="card-header bg-dark text-white fw-bold">All Activities</div>
+    <div class="card-body table-responsive">
+        {% if emissions %}
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Sub-type</th>
+                    <th>Value</th>
+                    <th>Unit</th>
+                    <th>Emission (kg CO₂)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in emissions %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ activity.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ activity.category }}</td>
+                    <td>{{ activity.sub_type }}</td>
+                    <td>{{ activity.value }}</td>
+                    <td>{{ activity.unit }}</td>
+                    <td>{{ activity.emission }}</td>
+                    <td class="text-center d-flex justify-content-center gap-4 align-items-center">
+                        <a href="javascript:void(0)" class="text-primary" onclick='openEditModal({
+                            id: {{ activity.id }},
+                            category: "{{ activity.category }}",
+                            sub_type: "{{ activity.sub_type }}",
+                            unit: "{{ activity.unit }}",
+                            value: {{ activity.value }},
+                            date: "{{ activity.date.strftime("%Y-%m-%d") }}"
+                        })'>
+                            <i class="fas fa-edit"></i>
+                        </a>
+
+                        <form action="{{ url_for('main.delete_activity', activity_id=activity.id) }}" method="POST"
+                            style="display: inline;">
+                            <button type="submit" class="btn btn-link text-danger p-0 m-0"
+                                onclick="return confirm('Are you sure?');">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No activities found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Activity Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form id="editForm" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editModalLabel">Edit Activity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="edit_category" class="form-label">Category</label>
+                        <select class="form-select" id="edit_category" name="category" required
+                            onchange="updateEditSubtypes()">
+                            <option value="">Select Category</option>
+                            <option value="Electricity">Electricity</option>
+                            <option value="Fuel">Fuel</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Material">Material</option>
+                            <option value="Waste">Waste</option>
+                        </select>
+                    </div>
+
+                    <!-- Sub-type -->
+                    <div class="mb-3">
+                        <label for="edit_sub_type" class="form-label">Sub-Type</label>
+                        <select class="form-select" id="edit_sub_type" name="sub_type" required
+                            onchange="updateEditUnit()">
+                            <option value="">Select Sub-Type</option>
+                        </select>
+                    </div>
+
+                    <!-- Value -->
+                    <div class="mb-3">
+                        <label for="edit_value" class="form-label">Value</label>
+                        <input type="number" step="0.01" class="form-control" id="edit_value" name="value" required>
+                    </div>
+
+                    <!-- Unit -->
+                    <div class="mb-3">
+                        <label for="edit_unit" class="form-label">Unit</label>
+                        <input type="text" class="form-control" id="edit_unit" name="unit" readonly required>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mb-3">
+                        <label for="edit_date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="edit_date" name="date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts -->
+<script>
+    const subTypeOptions = {
+        "Electricity": { "Electricity": "kWh" },
+        "Fuel": { "Diesel": "liters", "Petrol": "liters", "LPG": "kg" },
+        "Transport": { "Car": "km", "Truck": "km", "Bus": "km" },
+        "Material": { "Steel": "kg", "Plastic": "kg", "Aluminum": "kg" },
+        "Waste": { "Plastic Waste": "kg", "Organic Waste": "kg", "General Waste": "kg" }
+    };
+
+    function updateSubtypes() {
+        const category = document.getElementById("category").value;
+        const subTypeSelect = document.getElementById("sub_type");
+        const unitInput = document.getElementById("unit");
+
+        subTypeSelect.innerHTML = '<option value="">Select Sub-Type</option>';
+
+        if (subTypeOptions[category]) {
+            for (const [sub, unit] of Object.entries(subTypeOptions[category])) {
+                const opt = document.createElement("option");
+                opt.value = sub;
+                opt.textContent = sub;
+                subTypeSelect.appendChild(opt);
+            }
+        }
+        unitInput.value = "";
+    }
+
+    document.getElementById("sub_type").addEventListener("change", function () {
+        const category = document.getElementById("category").value;
+        const subType = this.value;
+        const unitInput = document.getElementById("unit");
+        unitInput.value = subTypeOptions[category]?.[subType] || "";
+    });
+
+    function updateEditSubtypes() {
+        const category = document.getElementById("edit_category").value;
+        const subTypeSelect = document.getElementById("edit_sub_type");
+        const unitInput = document.getElementById("edit_unit");
+
+        subTypeSelect.innerHTML = '<option value="">Select Sub-Type</option>';
+
+        if (subTypeOptions[category]) {
+            for (const [sub, unit] of Object.entries(subTypeOptions[category])) {
+                const opt = document.createElement("option");
+                opt.value = sub;
+                opt.textContent = sub;
+                subTypeSelect.appendChild(opt);
+            }
+        }
+        unitInput.value = "";
+    }
+
+    function updateEditUnit() {
+        const category = document.getElementById("edit_category").value;
+        const subType = document.getElementById("edit_sub_type").value;
+        const unitInput = document.getElementById("edit_unit");
+        unitInput.value = subTypeOptions[category]?.[subType] || "";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("date").value = today;
+    });
+
+    function toggleAllActivities() {
+        const section = document.getElementById("allActivitiesTable");
+        section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+    function openEditModal(activity) {
+        document.getElementById('editForm').action = `/activities/edit/${activity.id}`;
+        document.getElementById('edit_category').value = activity.category;
+        updateEditSubtypes();
+        document.getElementById('edit_sub_type').value = activity.sub_type;
+        updateEditUnit();
+        document.getElementById('edit_value').value = activity.value;
+        document.getElementById('edit_date').value = activity.date;
+
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        editModal.show();
+    }
+</script>
+
+
+<script>
+    // Auto-dismiss flash messages after 3 seconds
+    setTimeout(function() {
+      const flashMessages = document.querySelectorAll('.alert');
+      flashMessages.forEach(function(msg) {
+        msg.classList.remove('show');
+        msg.classList.add('fade');
+        setTimeout(() => msg.remove(), 300); // optional: remove from DOM
+      });
+    }, 3000);
+  </script>
+  
+
+{% endblock %}

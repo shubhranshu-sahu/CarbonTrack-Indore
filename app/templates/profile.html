@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  
+  <h2 class="text-success fw-bold mb-4 text-center">Your Profile</h2>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <form method="POST" action="{{url_for('profile.profile')}}">
+        <div class="row g-3">
+  
+          <div class="col-md-6">
+            <label for="businessName" class="form-label">Business Name</label>
+            <input type="text" class="form-control" id="businessName" name="business_name" value="{{ user.business_name }}" required>
+          </div>
+  
+          <div class="col-md-6">
+            <label for="ownerName" class="form-label">Owner Name</label>
+            <input type="text" class="form-control" id="ownerName" name="owner_name" value="{{ user.owner_name }}" required>
+          </div>
+  
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+          </div>
+  
+          <div class="col-md-6">
+            <label for="businessType" class="form-label">Business Type</label>
+            <select class="form-select" id="businessType" name="business_type" required onchange="updateSectors()">
+              <option value="">Select Business Type</option>
+              {% for type in ["Manufacturing", "Textile", "Food Processing", "IT Services", "Logistics", "Retail", "Construction", "Healthcare", "Education", "Other"] %}
+                <option value="{{ type }}" {% if user.business_type == type %}selected{% endif %}>{{ type }}</option>
+              {% endfor %}
+            </select>
+          </div>
+  
+          <div class="col-md-6">
+            <label for="sector" class="form-label">Sector</label>
+            <select class="form-select" id="sector" name="sector" required>
+              <option value="">Select Sector</option>
+              <!-- Options inserted via JS -->
+            </select>
+          </div>
+  
+          <div class="col-md-6">
+            <label for="category" class="form-label">MSME Category</label>
+            <select class="form-select" id="category" name="category" required>
+              <option value="Micro" {% if user.category == 'Micro' %}selected{% endif %}>Micro</option>
+              <option value="Small" {% if user.category == 'Small' %}selected{% endif %}>Small</option>
+              <option value="Medium" {% if user.category == 'Medium' %}selected{% endif %}>Medium</option>
+            </select>
+          </div>
+  
+        </div>
+  
+        <div class="mt-4 text-center">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="fas fa-save me-1"></i> Update Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Optional Password Update -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h5 class="text-success">Change Password</h5>
+      <form method="POST" action="/profile/change-password" class="row g-3">
+        <div class="col-md-4">
+          <input type="password" name="old_password" class="form-control" placeholder="Old Password" required>
+        </div>
+        <div class="col-md-4">
+          <input type="password" name="new_password" class="form-control" placeholder="New Password" required>
+        </div>
+        <div class="col-md-4">
+          <input type="password" name="confirm_password" class="form-control" placeholder="Confirm New Password" required>
+        </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-outline-success">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+    const sectorOptions = {
+      "Manufacturing": ["Iron & Steel", "Aluminium", "Cement", "Petrochemicals", "Foundry", "Paper & Pulp", "Other"],
+      "Textile": ["Textile", "Other"],
+      "Food Processing": ["Food Processing", "Other"],
+      "IT Services": ["Commercial Buildings", "Data Centers", "Other"],
+      "Logistics": ["Commercial Buildings", "Warehousing", "Other"],
+      "Retail": ["Commercial Buildings", "Warehousing", "Other"],
+      "Construction": ["Cement", "Other"],
+      "Healthcare": ["Commercial Buildings", "Other"],
+      "Education": ["Commercial Buildings", "Other"],
+      "Other": ["Other"]
+    };
+  
+    // Get user's current sector from backend and pass to JS
+    const currentSector = {{ user.sector | tojson }};    // safer handling
+  
+    function updateSectors() {
+      const businessType = document.getElementById("businessType").value;
+      const sectorDropdown = document.getElementById("sector");
+      const options = sectorOptions[businessType] || [];
+  
+      sectorDropdown.innerHTML = '<option value="">Select Sector</option>';
+  
+      options.forEach(sector => {
+        const opt = document.createElement("option");
+        opt.value = sector;
+        opt.textContent = sector;
+        if (sector === currentSector) {
+          opt.selected = true;
+        }
+        sectorDropdown.appendChild(opt);
+      });
+    }
+  
+    // Auto-select sector on load
+    document.addEventListener("DOMContentLoaded", updateSectors);
+  </script>
+  
+{% endblock %}

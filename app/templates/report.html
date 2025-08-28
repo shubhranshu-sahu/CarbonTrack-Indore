@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-success">Generate Emission Report</h2>
+    <p class="text-muted">Select a date range to download a detailed CO₂ emissions report.</p>
+  </div>
+
+  <!-- Date Range Card -->
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <form id="reportForm" class="row g-3 align-items-end justify-content-center">
+        <div class="col-md-4">
+          <label for="startDate" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="startDate" name="start_date" required>
+        </div>
+        <div class="col-md-4">
+          <label for="endDate" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="endDate" name="end_date" required>
+        </div>
+        <div class="col-md-3 d-grid">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-download me-1"></i> Download Report (PDF)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Optional: Toast or loading indicator -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="reportToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Your PDF report is being generated...
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("reportForm");
+  const toastEl = document.getElementById("reportToast");
+  const toast = new bootstrap.Toast(toastEl);
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+
+    // Normalize
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    if (!startDateInput.value || !endDateInput.value) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+
+    if (startDate > endDate) {
+      alert("Start date cannot be after end date.");
+      return;
+    }
+
+    if (endDate > today) {
+      alert("End date cannot be in the future.");
+      return;
+    }
+
+    toast.show();
+    window.location.href = `/report/download?start_date=${startDateInput.value}&end_date=${endDateInput.value}`;
+  });
+});
+
+  </script>
+  
+  
+
+{% endblock %}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CO₂ Emission Report</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+      color: #343a40;
+    }
+    h1, h2, h3 {
+      color: #198754;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin-top: 35px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .table th, .table td {
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      text-align: left;
+    }
+    .table th {
+      background-color: #e6f4ea;
+    }
+    .footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #6c757d;
+    }
+    .chart-img {
+      display: block;
+      margin: 0 auto;
+      max-width: 400px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>MSME CarbonTrack Report</h1>
+    <p><strong>Date Range:</strong> {{ start_date }} to {{ end_date }}</p>
+    <p><strong>Generated on:</strong> {{ generated_on }}</p>
+  </div>
+
+  <div class="section">
+    <h2>Total Emissions</h2>
+    <p><strong>{{ total_emission }} kg CO<sub>2</sub></strong> emitted during this period.</p>
+  </div>
+
+  <div class="section">
+    <h2>Category-wise Emissions</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Total Emission (kg CO₂)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in category_emissions %}
+        <tr>
+          <td>{{ row.category }}</td>
+          <td>{{ row.total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Optional Pie Chart -->
+    <img class="chart-img" src="https://image-charts.com/chart?cht=p&chs=500x300&chd=t:{{ category_emissions | map(attribute='total') | join(',') }}&chl={{ category_emissions | map(attribute='category') | join('|') }}&chco=198754,d1e7dd,a2d5c6,6fb98f,3d9970" alt="Pie Chart">
+  </div>
+
+  <div class="section">
+    <h2>Sub-category Breakdown</h2>
+
+    {% for category, sub_items in subcategory_emissions.items() %}
+      <h3 style="margin-top: 20px;">{{ category }}</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Sub-type</th>
+            <th>Emission (kg CO₂)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in sub_items %}
+          <tr>
+            <td>{{ row.sub_type }}</td>
+            <td>{{ row.total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  </div>
+
+  <div class="footer">
+    MSME CarbonTrack • Helping Businesses Reduce Carbon Footprint 🌱
+  </div>
+
+</body>
+</html>
