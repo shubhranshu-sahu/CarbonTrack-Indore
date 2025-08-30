@@ -1,11 +1,16 @@
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
+
+from flask_migrate import Migrate
+
 from dotenv import load_dotenv
 import os
 #  but when we use after_request , it is not required ! 
 # from flask import make_response #----------------------------------------------- prevent browser from caching pages, they must re request ! 
 
 db = SQLAlchemy()
+migrate = Migrate()  # <-- NEW
+
 
 def create_app():
     app = Flask(__name__)
@@ -21,8 +26,10 @@ def create_app():
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 
 
-
+    # Initialize database and migrate
     db.init_app(app) # used instead of db = SQLAlchemy(app)
+    migrate.init_app(app, db)  # <-- NEW
+
     
     from .routes.auth import auth_bp
     from .routes.summary import summary_bp
